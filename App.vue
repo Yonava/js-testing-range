@@ -1,18 +1,25 @@
 <template>
 	<div>
-      <div class="main">
-          <button @click="addEvent()">Begin Events</button>
-          <hr />
-      </div>
-
-      <center>
-
-        <div v-for="i in activeEvents" :key=i.activeEvents>
-          <p>{{ i.title }}</p>
-          <hr />
+        <div class="main">
+            <button @click="clock">Begin Events</button>
+            <h1>
+                {{ year }} / Seconds Elapsed: {{ clockTick }}
+            </h1>
+            <p v-for="i in industries" :key="i.industries">
+                {{ i.name }}: {{i.val}}
+            </p>
+            <hr />
         </div>
 
-      </center>
+        <center>
+
+        <div v-for="i in activeEvents" :key=i.activeEvents>
+            <p style="font-weight:bold;">{{ i.title }}</p>
+            <p>({{ i.year }}) Event ID: {{ i.id }}</p>
+            <hr />
+        </div>
+
+        </center>
   </div>
 </template>
 
@@ -21,7 +28,63 @@ export default {
     name: 'App',
     data: function() {
         return {
-        events: [
+        tempEvents: [],
+        activeEvents: [],
+        year: 2021,
+        clockTick: 0,
+        id: 0,
+        industries: [
+                {"name": "entertainment", "val": 1}, 
+                {"name": "mining", "val": 1}, 
+                {"name": "tech", "val": 1}, 
+                {"name": "energy", "val": 1},
+                {"name": "garments", "val": 1}, 
+                {"name": "chemicals", "val": 1}, 
+                {"name": "pharma", "val": 1},
+                {"name": "agriculture", "val": 1}, 
+                {"name": "healthcare", "val": 1}, 
+                {"name": "legal", "val": 1},
+                {"name": "insurance", "val": 1}, 
+                {"name": "finance", "val": 1}, 
+                {"name": "transport", "val": 1},
+                {"name": "construction", "val": 1}, 
+                {"name": "restaurant", "val": 1}, 
+                {"name": "defense", "val": 1}]
+
+            }
+    },
+    methods: {
+        
+        addEvent() {
+
+            this.id++
+            let currentEvent = this.tempEvents[0];
+            currentEvent.year = this.year;
+            currentEvent.id = this.id;
+            console.log(this.tempEvents.length);
+            this.tempEvents.splice(0, 1);
+            this.activeEvents.splice(0, 0, currentEvent);
+            this.computeEffects(currentEvent);
+          
+        },
+        computeEffects(ev) {
+
+            for (let i = 0; i < ev.effects[0].positiveIndustries.length; i++) {
+                for (let j = 0; j < this.industries.length; j++) {
+                    if (ev.effects[0].positiveIndustries[i] === this.industries[j].name) this.industries[j].val *= 1.02 // 2% flux
+                }
+            }
+            for (let i = 0; i < ev.effects[0].negativeIndustries.length; i++) {
+                for (let j = 0; j < this.industries.length; j++) {
+                    if (ev.effects[0].negativeIndustries[i] === this.industries[j].name) this.industries[j].val *= 0.98
+                }
+            }
+            
+ 
+        },
+        clock() {
+            
+            let events =  [
                     {
                     "title":"The Holidays Are Approaching and Consumer Spending is Going up",
                     "effects":[{
@@ -341,33 +404,21 @@ export default {
                         "negativeIndustries":["restaurant"]
                     }]
                     }
-                ], // in build we will have json imported from assets and iterate data using v-loop
-        activeEvents: [],
-        i: 0,
-        eventDelay: .1, // in seconds
-        run: true,
-
-            }
-    },
-    methods: {
-        
-        addEvent() {
-          let currentEvent = this.events[this.i]
-          this.activeEvents.splice(0, 0, currentEvent)
-          this.i++
-          this.computeEffects(currentEvent)
-          setTimeout(this.addEvent, this.eventDelay*1000)
-        },
-        computeEffects(ev) {
-          
-          console.log(ev.effects[0].positiveIndustries[0])
-          console.log(this.i)
-          // for (let i = 0; i < ev.effects.length; i++) {
-
-          // }
+                ]
             
-        },
+            if (this.tempEvents.length === 0) this.tempEvents = events
+            
+            this.tempEvents.sort(() => 0.5 - Math.random())
+
+            if (this.clockTick % 2 === 0) this.year++;
+            if (this.clockTick % 1 === 0) this.addEvent();
+            
+            this.clockTick++
+
+            setTimeout(this.clock, 1000)
+        }
     }
+
 }
 </script>
     
